@@ -1,0 +1,249 @@
+/* search.css */
+/* .stock-search-container {
+  margin: 20px 10px;
+  position: relative;
+  height: 20px;
+}
+
+.search-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  margin-right: 8px;
+}
+
+.stock-search-input {
+  width: 300px;
+  padding: 8px;
+  padding-left: 30px; 
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.stock-suggestions {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stock-suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.stock-suggestions li:hover {
+  background-color: #f4f4f4;
+}
+
+.stock-suggestions li.selected {
+  color: red;
+}  */
+.dashboard-container {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-container {
+  position: relative;
+  margin-top: 10px ;
+  
+  
+}
+
+.chart-container {
+  position: relative;
+  width: 2400px;
+}
+
+.stock-search-container {
+  /* margin-bottom: 20px; */
+}
+.stock-search-input{
+  box-shadow: 1px 1px 10px 2px rgba(0,0,0,.3);
+}
+
+.stock-suggestions {
+  position: absolute;
+  /* top: calc(100%); Adjust the distance from the search input */
+  left: 94px;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  z-index: 3; /* Ensure suggestions appear above the chart */
+}
+
+.stock-suggestions li {
+  padding: 8px;
+  cursor: pointer;
+  font-family: "Exo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 35px;
+  font-style: normal;
+}
+
+.stock-suggestions li:hover {
+  background-color: #f4f4f4;
+}
+
+.stock-suggestions li.selected {
+  color: rgb(0, 89, 255);
+}
+.institution_name{
+  font-family: "Slabo 27px", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 30px;
+}
+
+.tradingview-chart {
+  position: relative;
+  z-index: 0; /* Ensure the chart is behind the suggestions */
+}
+.popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+}
+
+.popup {
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 300px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  width: 10px;
+}
+
+.popup-content {
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.popup-content p {
+  margin-bottom: 10px;
+}
+
+.popup-content label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.popup-content input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.popup-content button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popup-content button:hover {
+  background-color: #0056b3;
+}
+
+.buy-button {
+  background-color: green;
+  cursor: pointer;
+  width: 40%;
+  height: 100%;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.30);
+}
+.buy-button:hover{
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0);
+}
+
+.sell-button {
+  margin-left: 20px;
+  background-color: red;
+  cursor: pointer;
+  width: 40%;
+  height: 100%;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.30);
+}
+.sell-button:hover{
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0);
+}
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+.button-24 {
+  background: #FF4742;
+  border: 1px solid #FF4742;
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: nunito,roboto,proxima-nova,"proxima nova",sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 16px;
+  /* min-height: 40px; */
+  outline: 0;
+  padding: 0px 14px;
+  text-align: center;
+  text-rendering: geometricprecision;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+}
+
+.button-24:hover,
+.button-24:active {
+  background-color: initial;
+  background-position: 0 0;
+  color: #FF4742;
+}
+
+.button-24:active {
+  opacity: .5;
+}
+
