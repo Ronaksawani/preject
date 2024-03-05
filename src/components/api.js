@@ -166,7 +166,7 @@ function Dashboard() {
       intervalId = setInterval(async () => {
         try {
           const serverData = await axios.get(
-            "http://localhost:3002/server2/current-prices",
+            "https://project-server-22fx.vercel.app/server2/current-prices",
             {
               params: {
                 orderList: orderList,
@@ -193,7 +193,7 @@ function Dashboard() {
       // console.log(selectedSymbol);
       const IntervalId = setInterval(async () => {
         await axios
-          .get("http://localhost:3002/api/stock-price", {
+          .get("https://project-server-22fx.vercel.app/api/stock-price", {
             params: {
               symbols: selectedSymbol,
             },
@@ -220,7 +220,7 @@ function Dashboard() {
       // console.log(selectedSymbol);
       const IntervalId = setInterval(async () => {
         await axios
-          .get("http://localhost:3002/api/stock-price", {
+          .get("https://project-server-22fx.vercel.app/api/stock-price", {
             params: {
               symbols: selectedSymbol,
             },
