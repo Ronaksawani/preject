@@ -10,7 +10,7 @@ const ChartComponent = ({ symbol }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3002/chart/ohlc", {
+        const response = await axios.get("https://project-server-22fx.vercel.app/chart/ohlc", {
           params: {
             symbol: symbol,
           },
