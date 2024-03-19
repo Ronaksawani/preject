@@ -69,7 +69,7 @@ const Home = () => {
               </div>
 
               <div className="signu" style={{ marginRight: "25px" }}>
-                <NavLink style={{ textDecoration: "none" }}>
+                <NavLink to="/sign-up-login" style={{ textDecoration: "none" }}>
                   <div
                     className="signup"
                     style={{
@@ -87,7 +87,7 @@ const Home = () => {
               </div>
 
               <div className="logi">
-                <NavLink style={{ textDecoration: "none" }}>
+                <NavLink to="/sign-up-login" style={{ textDecoration: "none" }}>
                   <div
                     className="login"
                     style={{
@@ -122,7 +122,10 @@ const Home = () => {
                 <div className="text3">Their Tading Skills!!</div>
 
                 <div className="signu" style={{}}>
-                  <NavLink style={{ textDecoration: "none" }}>
+                  <NavLink
+                    to="/sign-up-login"
+                    style={{ textDecoration: "none" }}
+                  >
                     <div
                       className="signup-sec"
                       style={{
@@ -282,6 +285,7 @@ const Home = () => {
                 soon as it comes to mind. Open an account today to get started.
               </p>
               <NavLink
+                to="/sign-up-login"
                 style={{
                   textDecoration: "none",
                   display: "flex",

@@ -14,7 +14,7 @@ const CheckConnection = (props) => {
               marginTop: "15%",
               display: "flex",
               flexDirection: "column",
-              height: "70%",
+              height: "35%",
               width: "100%",
               alignItems: "center",
             }}

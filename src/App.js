@@ -1,13 +1,14 @@
 import React from "react";
-import { Route,Routes } from 'react-router-dom'
-import Dashboard from "./components/api"
+import { HashRouter } from "react-router-dom";
+import Routing from "./components/Routing";
 
 const App = () => {
-  console.log("App");
   return (
-    <>
-      <Dashboard/>
-    </>
+    <HashRouter>
+      <div>
+        <Routing />
+      </div>
+    </HashRouter>
   );
 };
 
