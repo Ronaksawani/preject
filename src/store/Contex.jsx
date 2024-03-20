@@ -15,7 +15,7 @@ export const GlobalProvider = ({ children }) => {
     symbol: "TCS",
     name: "Tata Consultancy Services Limited",
   });
-
+  const [logout, setLogout] = useState(false);
   const [userDetails, setUserDetails] = useState([]);
   const [phoneNumber, setPhoneNumber] = useState();
   const [selectedButton, setSelectedButton] = useState("dashboard");
@@ -39,6 +39,8 @@ export const GlobalProvider = ({ children }) => {
         setServerWatchlistPrice,
         orderList,
         setOrderList,
+        logout,
+        setLogout,
       }}
     >
       {children}

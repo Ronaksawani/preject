@@ -17,10 +17,13 @@ import exit from "../assets/images/exit.png";
 import CheckConnection from "./CheckConnection";
 import equity from "../assets/images/equity.png";
 import DashMarginChart from "./dash_margin_chart";
-
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
 import add from "../assets/images/icons8-add-new-50.png";
 import done from "../assets/images/icons8-done-64.png";
 import no_watchlist_img from "../assets/images/no_watchlist.png";
+import bull_btn_img from "../assets/images/bull-market-img.png";
+import bear_btn_img from "../assets/images/bear-market-img.png";
+import logout_img from "../assets/images/logout_img.png";
 import { useGlobalContext } from "../store/Contex";
 import { db } from "./config";
 import {
@@ -226,12 +229,31 @@ function Dashboard() {
     setUserDetails,
     orderList,
     setOrderList,
+    logout,
+    setLogout,
   } = useGlobalContext();
   const navigate = useNavigate();
 
   const [isserverWatchlistPriceLoading, setisServerWatchlistPriceLoading] =
     useState(true);
   const [totalPNL, setTotalPNL] = useState(0);
+  const [marketStatus, setMarketStatus] = useState(null);
+
+  useEffect(() => {
+    const fetchMarketStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/market-status");
+        const data = await response.json();
+        setMarketStatus(data.status);
+      } catch (error) {
+        console.error("Error fetching market status:", error);
+      }
+    };
+
+    const intervalId = setInterval(fetchMarketStatus, 1000); // Call every second
+
+    return () => clearInterval(intervalId); // Cleanup the interval on unmount
+  }, []);
 
   useEffect(() => {
     const storedSessionData = sessionStorage.getItem("logged-in-session-ID");
@@ -371,25 +393,35 @@ function Dashboard() {
   };
 
   const handleRemoveTransaction = async (index) => {
-    setOrderList(orderList.filter((_, i) => i !== index));
-    if (orderList.length < 2) {
-      setServerPrice(orderList.filter((_, i) => i !== index));
-    }
-    const removedOrder = orderList[index];
-    removeOrderFromFirestore(removedOrder);
+    if (marketStatus === "Open") {
+      setOrderList(orderList.filter((_, i) => i !== index));
+      if (orderList.length < 2) {
+        setServerPrice(orderList.filter((_, i) => i !== index));
+      }
+      const removedOrder = orderList[index];
+      removeOrderFromFirestore(removedOrder);
 
-    const tradeHistoryOrder = serverPrice[index];
-    const exitTime = Math.floor(Date.now() / 1000);
-    const orderWithExitTime = { ...tradeHistoryOrder, exitTime };
-    console.log("remove", orderWithExitTime);
-    // Update tradeHistory with the constructed object
-    const docRef = doc(db, "users", phoneNumber);
-    await updateDoc(docRef, {
-      tradeHistory: arrayUnion(orderWithExitTime),
-      margin_available:
-        userDetails.margin_available + orderWithExitTime.serverCurrentPrice,
-      margin_used: userDetails.margin_used - orderWithExitTime.buyPrice,
-    });
+      const tradeHistoryOrder = serverPrice[index];
+      const exitTime = Math.floor(Date.now() / 1000);
+      const orderWithExitTime = { ...tradeHistoryOrder, exitTime };
+      console.log("remove", orderWithExitTime);
+      // Update tradeHistory with the constructed object
+      const docRef = doc(db, "users", phoneNumber);
+      await updateDoc(docRef, {
+        tradeHistory: arrayUnion(orderWithExitTime),
+        margin_available:
+          userDetails.margin_available + orderWithExitTime.serverCurrentPrice,
+        margin_used: userDetails.margin_used - orderWithExitTime.buyPrice,
+      });
+    } else {
+      // Market is closed, show error toast
+      new Audio(errorSound).play();
+      toast.warning("Markets are closed. Trades can't be exited.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+    }
   };
 
   const removeOrderFromFirestore = async (orderToRemove) => {
@@ -430,56 +462,66 @@ function Dashboard() {
   };
 
   const handleRemoveDashboardTransaction = async () => {
-    // Filter orderList to remove the selected transactions
-    const updatedOrderList = orderList.filter(
-      (_, index) => !selectedTransactions.includes(index)
-    );
-    setOrderList(updatedOrderList);
+    if (marketStatus === "Open") {
+      // Filter orderList to remove the selected transactions
+      const updatedOrderList = orderList.filter(
+        (_, index) => !selectedTransactions.includes(index)
+      );
+      setOrderList(updatedOrderList);
 
-    const docRef = doc(db, "users", phoneNumber); // Construct Firestore document reference
-    await updateDoc(docRef, {
-      orderList: updatedOrderList,
-    });
+      const docRef = doc(db, "users", phoneNumber); // Construct Firestore document reference
+      await updateDoc(docRef, {
+        orderList: updatedOrderList,
+      });
 
-    const tradeHistoryOrders = selectedTransactions.map(
-      (index) => serverPrice[index]
-    );
-    //console.log("trade hist", tradeHistoryOrders);
+      const tradeHistoryOrders = selectedTransactions.map(
+        (index) => serverPrice[index]
+      );
+      //console.log("trade hist", tradeHistoryOrders);
 
-    // Calculate the sum of all serverCurrentPrice values
-    const totalServerCurrentPrice = tradeHistoryOrders.reduce(
-      (total, order) => order.serverCurrentPrice * order.quantity + total,
-      0
-    );
-    //console.log(totalServerCurrentPrice);
-    const totalMarginUsed = tradeHistoryOrders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+      // Calculate the sum of all serverCurrentPrice values
+      const totalServerCurrentPrice = tradeHistoryOrders.reduce(
+        (total, order) => order.serverCurrentPrice * order.quantity + total,
+        0
+      );
+      //console.log(totalServerCurrentPrice);
+      const totalMarginUsed = tradeHistoryOrders.reduce(
+        (total, order) => total + order.totalPrice,
+        0
+      );
 
-    // const totalPNL = tradeHistoryOrders.reduce(
-    //   (total, order) => total + order.,
-    //   0
-    // );
+      // const totalPNL = tradeHistoryOrders.reduce(
+      //   (total, order) => total + order.,
+      //   0
+      // );
 
-    const exitTime = Math.floor(Date.now() / 1000);
-    const ordersWithExitTime = tradeHistoryOrders.map((order) => ({
-      ...order,
-      exitTime,
-    }));
+      const exitTime = Math.floor(Date.now() / 1000);
+      const ordersWithExitTime = tradeHistoryOrders.map((order) => ({
+        ...order,
+        exitTime,
+      }));
 
-    const tscp = parseFloat(totalServerCurrentPrice);
-    const tmu = parseFloat(totalMarginUsed);
-    // console.log(typeof userDetails.margin_used, typeof totalMarginUsed);
-    // Update tradeHistory with the constructed objects
-    await updateDoc(docRef, {
-      tradeHistory: arrayUnion(...ordersWithExitTime),
-      margin_available: userDetails.margin_available + tscp,
-      margin_used: userDetails.margin_used - tmu,
-    });
-    setServerPrice(updatedOrderList);
-    // Clear the selectedTransactions array
-    setSelectedTransactions([]);
+      const tscp = parseFloat(totalServerCurrentPrice);
+      const tmu = parseFloat(totalMarginUsed);
+      // console.log(typeof userDetails.margin_used, typeof totalMarginUsed);
+      // Update tradeHistory with the constructed objects
+      await updateDoc(docRef, {
+        tradeHistory: arrayUnion(...ordersWithExitTime),
+        margin_available: userDetails.margin_available + tscp,
+        margin_used: userDetails.margin_used - tmu,
+      });
+      setServerPrice(updatedOrderList);
+      // Clear the selectedTransactions array
+      setSelectedTransactions([]);
+    } else {
+      // Market is closed, show error toast
+      new Audio(errorSound).play();
+      toast.warning("Markets are closed. Trades can't be exited.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+    }
   };
 
   const btnClickDataFetch = async () => {
@@ -509,36 +551,56 @@ function Dashboard() {
   };
 
   const handleBuyButtonClick = async () => {
-    try {
-      //btnClickDataFetch();
-      // console.log(selectedSymbol);
-      const IntervalId = setInterval(btnClickDataFetch, 500);
-      setPopUpIntervalId(IntervalId);
+    if (marketStatus === "Open") {
+      try {
+        //btnClickDataFetch();
+        // console.log(selectedSymbol);
+        const IntervalId = setInterval(btnClickDataFetch, 500);
+        setPopUpIntervalId(IntervalId);
 
-      // const price = response.data.price;
-      //console.log("Stock price:", currentPrice);
-      // setBuyPrice(price);
-      setShowBuyPopup(true);
-      // Update state or perform other actions with the price
-    } catch (error) {
-      console.error("Error fetching stock price:", error);
+        // const price = response.data.price;
+        //console.log("Stock price:", currentPrice);
+        // setBuyPrice(price);
+        setShowBuyPopup(true);
+        // Update state or perform other actions with the price
+      } catch (error) {
+        console.error("Error fetching stock price:", error);
+      }
+    } else {
+      // Market is closed, show error toast
+      new Audio(errorSound).play();
+      toast.warning("Markets are closed. Trades can't be placed.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     }
   };
 
   const handleSellButtonClick = async () => {
-    try {
-      //btnClickDataFetch();
-      // console.log(selectedSymbol);
-      const IntervalId = setInterval(btnClickDataFetch, 500);
-      setPopUpIntervalId(IntervalId);
+    if (marketStatus === "Open") {
+      try {
+        //btnClickDataFetch();
+        // console.log(selectedSymbol);
+        const IntervalId = setInterval(btnClickDataFetch, 500);
+        setPopUpIntervalId(IntervalId);
 
-      // const price = response.data.price;
-      //console.log("Stock price:", currentPrice);
-      // setBuyPrice(price);
-      setShowSellPopup(true);
-      // Update state or perform other actions with the price
-    } catch (error) {
-      console.error("Error fetching stock price:", error);
+        // const price = response.data.price;
+        //console.log("Stock price:", currentPrice);
+        // setBuyPrice(price);
+        setShowSellPopup(true);
+        // Update state or perform other actions with the price
+      } catch (error) {
+        console.error("Error fetching stock price:", error);
+      }
+    } else {
+      // Market is closed, show error toast
+      new Audio(errorSound).play();
+      toast.warning("Markets are closed. Trades can't be placed.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     }
   };
 
@@ -628,39 +690,71 @@ function Dashboard() {
     }
   };
 
-  const handleSellConfirmOrder = () => {
+  const handleSellConfirmOrder = async () => {
     // Implement sell order confirmation logic here
     if (sellQuantity > 0) {
       new Audio(alertsound).play();
       const totalPrice = (
         parseFloat(sellQuantity) * parseFloat(currentPrice)
       ).toFixed(2);
-      const order = {
-        symbol: selectedStock.symbol.toUpperCase(),
-        name: selectedStock.name,
-        sellPrice: currentPrice,
-        quantity: sellQuantity,
-        totalPrice: totalPrice,
-        type: "SELL",
-        serverCurrentPrice: 0,
-        timestamp: Math.floor(Date.now() / 1000),
-      };
-      // setOrderList([...orderList, order]);
-      addOrderToFirestore(order);
-      setShowSellPopup(false);
-      setTranctStatus(true);
-      clearInterval(popUpIntervalId);
-      setSellQuantity("1");
-      toast.success(
-        `Sell  ${selectedStock.symbol.toUpperCase()} is Complete. ${sellQuantity} qty @ ${
-          order.sellPrice
-        }`,
-        {
-          position: "bottom-right",
-          autoClose: 3000,
-          theme: "colored",
-        }
-      );
+
+      // Check if margin available is sufficient
+      if (parseFloat(userDetails.margin_available) >= parseFloat(totalPrice)) {
+        new Audio(alertsound).play();
+        const order = {
+          symbol: selectedStock.symbol.toUpperCase(),
+          name: selectedStock.name,
+          sellPrice: currentPrice,
+          quantity: sellQuantity,
+          totalPrice: totalPrice,
+          type: "SELL",
+          serverCurrentPrice: 0,
+          timestamp: Math.floor(Date.now() / 1000),
+          exitTime: 0,
+        };
+        // setOrderList([...orderList, order]);
+        addOrderToFirestore(order);
+        setShowSellPopup(false);
+        setTranctStatus(true);
+        clearInterval(popUpIntervalId);
+        setSellQuantity("1");
+        toast.success(
+          `Sell  ${selectedStock.symbol.toUpperCase()} is Complete. ${sellQuantity} qty @ ${
+            order.sellPrice
+          }`,
+          {
+            position: "bottom-right",
+            autoClose: 3000,
+            theme: "colored",
+          }
+        );
+
+        const docRef = doc(db, "users", phoneNumber); // Construct Firestore document reference
+        await updateDoc(docRef, {
+          margin_available: userDetails.margin_available - totalPrice,
+          margin_used: userDetails.margin_used + parseFloat(totalPrice),
+        });
+      } else {
+        const marginShortfall = new Intl.NumberFormat("en-IN", {
+          style: "currency",
+          currency: "INR",
+          currencyDisplay: "symbol",
+        }).format(
+          (
+            parseFloat(totalPrice) - parseFloat(userDetails.margin_available)
+          ).toFixed(2)
+        );
+        // Show error toast if margin available is insufficient
+        new Audio(errorSound).play();
+        toast.warning(
+          `Insufficient margin of ${marginShortfall} to complete the transaction!`,
+          {
+            position: "top-right",
+            autoClose: 3000,
+            theme: "colored",
+          }
+        );
+      }
     } else {
       new Audio(errorSound).play();
       toast.error("Please enter valid Quantity !!", {
@@ -744,6 +838,13 @@ function Dashboard() {
     }
   }
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("logged-in-session-ID");
+    navigate("/sign-up-login");
+    new Audio(alertsound).play();
+    setLogout(true);
+  };
+
   return (
     <>
       <div
@@ -782,7 +883,7 @@ function Dashboard() {
         </div>
         <div
           className="btn-container"
-          style={{ marginLeft: "200px", display: "flex" }}
+          style={{ marginLeft: "300px", display: "flex" }}
         >
           <button
             className="nav-btn"
@@ -803,6 +904,42 @@ function Dashboard() {
             onClick={() => handleButtonClick("Trades")}
           >
             Trades
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginLeft: "70px",
+          }}
+        >
+          <button
+            style={{
+              border: "none",
+              backgroundColor: "transparent",
+              border: "2px solid #0D2958",
+              borderRadius: "5px",
+              width: "120px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "40px",
+              padding: "0px 30px 0px 30px",
+              cursor: "pointer",
+            }}
+            onClick={handleLogout}
+          >
+            <img src={logout_img} height={20}></img>{" "}
+            <span
+              style={{
+                marginLeft: "5px",
+                color: "#0D2958",
+                fontSize: "18px",
+                fontWeight: "bold",
+              }}
+            >
+              Logout
+            </span>
           </button>
         </div>
       </div>
@@ -953,11 +1090,39 @@ function Dashboard() {
                       className="user_greeting"
                       style={{
                         color: "black",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
                       <h1 style={{ fontSize: "30px", fontWeight: "normal" }}>
                         Hi, {userDetails.name}
                       </h1>
+                      <span
+                        style={{
+                          marginRight: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          fontWeight: "bold",
+                          color:
+                            marketStatus === "Closed" ? "#ff7c7c" : "#73b573",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "25px",
+                            marginRight: "5px",
+                            paddingBottom: "5px",
+                          }}
+                        >
+                          •
+                        </span>
+                        <span>
+                          {marketStatus === "Closed"
+                            ? "Market is Closed"
+                            : "Market is Open"}
+                        </span>
+                      </span>
                     </div>
 
                     <div
@@ -1121,7 +1286,7 @@ function Dashboard() {
                                 className="select-header"
                                 style={{ width: "2px" }}
                               >
-                                <input
+                                {/* <input
                                   type="checkbox"
                                   checked={false}
                                   onChange={() => {}}
@@ -1131,7 +1296,7 @@ function Dashboard() {
                                     width: "15px",
                                     marginLeft: "10px",
                                   }}
-                                />
+                                /> */}
                               </th>
                               <th className="header">DateTime</th>
                               <th className="header">Type</th>
@@ -1312,7 +1477,14 @@ function Dashboard() {
                         Trade history
                       </div>
 
-                    
+                      <ReactHTMLTableToExcel
+                        id="downloadBtn"
+                        table="table-to-xls"
+                        filename="Trade-History"
+                        sheet="Trade-history"
+                        className="fa fa-download"
+                        buttonText=" Download"
+                      />
 
                       {/* <button
                         id="downloadBtn"
@@ -1417,7 +1589,9 @@ function Dashboard() {
                                       {transaction.quantity}
                                     </td>
                                     <td className="email-cell">
-                                      {transaction.buyPrice}
+                                      {transaction.type === "BUY"
+                                        ? transaction.buyPrice
+                                        : transaction.sellPrice}
                                     </td>
                                     <td className="email-cell">
                                       {transaction.serverCurrentPrice}
@@ -1507,20 +1681,54 @@ function Dashboard() {
                 <div
                   className="action-buttons"
                   style={{
-                    width: "300px",
+                    width: "400px",
                     marginLeft: "20px",
                     marginTop: "30px",
                     height: "50px",
+                    display: "flex",
                   }}
                 >
-                  <button onClick={handleBuyButtonClick} className="buy-button">
-                    Buy
-                  </button>
                   <button
-                    onClick={handleSellButtonClick}
-                    className="sell-button"
+                    className="button-65 buy-button"
+                    style={{
+                      backgroundColor: "#20ac20",
+                      height: "50px",
+                      fontSize: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "150px",
+                    }}
+                    onClick={handleBuyButtonClick}
                   >
-                    Sell
+                    BUY
+                    <img
+                      src={bull_btn_img}
+                      height={35}
+                      style={{ marginLeft: "10px" }}
+                    ></img>
+                  </button>
+
+                  <button
+                    className="button-65 buy-button"
+                    style={{
+                      backgroundColor: "#ff4742",
+                      height: "50px",
+                      fontSize: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "150px",
+                      marginLeft: "30px",
+                    }}
+                    onClick={handleSellButtonClick}
+                  >
+                    SELL
+                    <img
+                      src={bear_btn_img}
+                      height={35}
+                      style={{ marginLeft: "10px" }}
+                    ></img>
                   </button>
                 </div>
               </div>

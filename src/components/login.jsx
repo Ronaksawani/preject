@@ -19,8 +19,14 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { useGlobalContext } from "../store/Contex";
 
 const Login = () => {
-  const { userDetails, setUserDetails, phoneNumber, setPhoneNumber } =
-    useGlobalContext();
+  const {
+    userDetails,
+    setUserDetails,
+    phoneNumber,
+    setPhoneNumber,
+    logout,
+    setLogout,
+  } = useGlobalContext();
   const [IsOTPBtnClicked, setIsOTPBtnClicked] = useState(false);
   const [isTnC_Checked, setIsTnC_Checked] = useState(false);
 
@@ -34,6 +40,17 @@ const Login = () => {
   const [otp, setotp] = useState();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (logout === true) {
+      toast.success("Logged out successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      setLogout(false);
+    }
+  }, [logout]);
 
   useEffect(() => {
     setPhoneNumber("");
