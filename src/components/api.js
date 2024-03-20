@@ -17,7 +17,7 @@ import exit from "../assets/images/exit.png";
 import CheckConnection from "./CheckConnection";
 import equity from "../assets/images/equity.png";
 import DashMarginChart from "./dash_margin_chart";
-import ReactHTMLTableToExcel from "react-html-table-to-excel";
+
 import add from "../assets/images/icons8-add-new-50.png";
 import done from "../assets/images/icons8-done-64.png";
 import no_watchlist_img from "../assets/images/no_watchlist.png";
@@ -242,7 +242,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchMarketStatus = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/market-status");
+        const response = await fetch("https://project-server-22fx.vercel.app/api/market-status");
         const data = await response.json();
         setMarketStatus(data.status);
       } catch (error) {
@@ -1477,14 +1477,7 @@ function Dashboard() {
                         Trade history
                       </div>
 
-                      <ReactHTMLTableToExcel
-                        id="downloadBtn"
-                        table="table-to-xls"
-                        filename="Trade-History"
-                        sheet="Trade-history"
-                        className="fa fa-download"
-                        buttonText=" Download"
-                      />
+                     
 
                       {/* <button
                         id="downloadBtn"
