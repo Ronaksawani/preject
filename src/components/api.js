@@ -17,7 +17,7 @@ import exit from "../assets/images/exit.png";
 import CheckConnection from "./CheckConnection";
 import equity from "../assets/images/equity.png";
 import DashMarginChart from "./dash_margin_chart";
-
+//import ReactHTMLTableToExcel from "react-html-table-to-excel";
 import add from "../assets/images/icons8-add-new-50.png";
 import done from "../assets/images/icons8-done-64.png";
 import no_watchlist_img from "../assets/images/no_watchlist.png";
@@ -1490,7 +1490,14 @@ function Dashboard() {
                         Trade history
                       </div>
 
-                    
+                      {/* <ReactHTMLTableToExcel
+                        id="downloadBtn"
+                        table="table-to-xls"
+                        filename="Trade-History"
+                        sheet="Trade-history"
+                        className="fa fa-download"
+                        buttonText=" Download"
+                      /> */}
 
                       {/* <button
                         id="downloadBtn"
@@ -1903,7 +1910,7 @@ function Dashboard() {
                           color: totalPL >= 0 ? "green" : "red",
                         }}
                       >
-                        {totalPL >= 0 ? `${totalPL}` : totalPL}
+                        {totalPL >= 0 ? `+${totalPL}` : totalPL}
                       </span>
                     </div>
                   </div>
