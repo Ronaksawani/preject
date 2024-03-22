@@ -89,6 +89,7 @@ const Username = () => {
       p_l: 0,
       orderList: [],
       tradeHistory: [],
+      marginChart: [{ value: 1000000, time: Math.floor(Date.now() / 1000) }],
     };
     await setDoc(doc(db, "users", phoneNumber), docData).then((res) => {
       navigate("/dashboard-trades");

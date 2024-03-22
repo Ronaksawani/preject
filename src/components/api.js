@@ -17,7 +17,7 @@ import exit from "../assets/images/exit.png";
 import CheckConnection from "./CheckConnection";
 import equity from "../assets/images/equity.png";
 import DashMarginChart from "./dash_margin_chart";
-
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
 import add from "../assets/images/icons8-add-new-50.png";
 import done from "../assets/images/icons8-done-64.png";
 import no_watchlist_img from "../assets/images/no_watchlist.png";
@@ -39,7 +39,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import { firestore } from "firebase/app";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import { type } from "@testing-library/user-event/dist/type";
 
 function StockSearch() {
   const [inputText, setInputText] = useState("");
@@ -240,19 +239,8 @@ function Dashboard() {
   const [marketStatus, setMarketStatus] = useState(null);
 
   useEffect(() => {
-    const fetchMarketStatus = async () => {
-      try {
-        const response = await fetch("https://project-server-22fx.vercel.app/api/market-status");
-        const data = await response.json();
-        setMarketStatus(data.status);
-      } catch (error) {
-        console.error("Error fetching market status:", error);
-      }
-    };
-
-    const intervalId = setInterval(fetchMarketStatus, 1000); // Call every second
-
-    return () => clearInterval(intervalId); // Cleanup the interval on unmount
+    const marketState = getMarketStatus();
+    setMarketStatus(marketState);
   }, []);
 
   useEffect(() => {
@@ -796,45 +784,42 @@ function Dashboard() {
     }
   };
 
-  function formatAmount(amount) {
-    // If amount is less than 1 lakh
-    if (amount < 100000) {
-      // Convert amount to thousands
-      const thousands = amount / 1000;
-      // Format thousands to have 2 decimal places
-      const formattedThousands = thousands.toFixed(2);
-      // Check if the decimal part is zero
-      if (formattedThousands.endsWith(".00")) {
-        // If so, remove the decimal part
-        return Math.floor(thousands) + "K";
+  function formatAmount(num) {
+    // Check if num is defined and is a number
+
+    if (num >= 0) {
+      let strNum = num.toString();
+      if (num > 99999999.99) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum.substring(0, 2) + "CR"
+          : strNum.substring(0, 3) + "." + strNum.substring(2, 4) + "CR";
+      } else if (num >= 10000000) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum[0] + "CR"
+          : strNum[0] + "." + strNum.substring(1, 3) + "CR";
+      } else if (num > 999999.99) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum.substring(0, 2) + "L"
+          : strNum.substring(0, 2) + "." + strNum.substring(2, 4) + "L";
+      } else if (num >= 100000) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum[0] + "L"
+          : strNum[0] + "." + strNum.substring(1, 3) + "L";
+      } else if (num > 9999.99) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum.substring(0, 2) + "K"
+          : strNum.substring(0, 2) + "." + strNum.substring(1, 3) + "K";
+      } else if (num >= 1000) {
+        return strNum[1] === "0" && strNum[2] === "0"
+          ? strNum[0] + "K"
+          : strNum[0] + "." + strNum.substring(1, 3) + "K";
+      } else if (num < 1000) {
+        return "₹" + strNum;
       } else {
-        // Otherwise, return the formatted string with "K"
-        return formattedThousands + "K";
-      }
-    } else if (amount < 10000000) {
-      // Convert amount to lakhs
-      const lakhs = amount / 100000;
-      // Check if the decimal part is zero
-      if ((lakhs * 100) % 100 === 0) {
-        // If so, remove the decimal part
-        return Math.floor(lakhs) + "L";
-      } else {
-        // Otherwise, return the formatted string with 2 decimal places and "L"
-        return lakhs.toFixed(2) + "L";
+        return "!!!";
       }
     } else {
-      // Convert amount to crores
-      const crores = amount / 10000000;
-      // Format crores to have 2 decimal places
-      const formattedCrores = crores.toFixed(2);
-      // Check if the decimal part is zero
-      if (formattedCrores.endsWith(".00")) {
-        // If so, remove the decimal part
-        return Math.floor(crores) + "CR";
-      } else {
-        // Otherwise, return the formatted string with "CR"
-        return formattedCrores + "CR";
-      }
+      return "Invalid amount";
     }
   }
 
@@ -845,6 +830,34 @@ function Dashboard() {
     setLogout(true);
   };
 
+  function getMarketStatus() {
+    const currentDate = new Date();
+    const dayOfWeek = currentDate.getDay(); // Sunday is 0, Saturday is 6
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return "Closed";
+    }
+
+    const currentHour = currentDate.getHours();
+    const currentMinute = currentDate.getMinutes();
+    const marketOpenHour = 9;
+    const marketCloseHour = 15;
+
+    if (
+      currentHour > marketOpenHour ||
+      (currentHour === marketOpenHour && currentMinute >= 15) // Assuming market opens at 9:15 AM
+    ) {
+      if (
+        currentHour < marketCloseHour ||
+        (currentHour === marketCloseHour && currentMinute <= 30) // Assuming market closes at 3:30 PM
+      ) {
+        return "Open";
+      }
+    }
+
+    return "Closed";
+  }
+  var collectionRef = db.collection;
   return (
     <>
       <div
@@ -1477,7 +1490,14 @@ function Dashboard() {
                         Trade history
                       </div>
 
-                     
+                      <ReactHTMLTableToExcel
+                        id="downloadBtn"
+                        table="table-to-xls"
+                        filename="Trade-History"
+                        sheet="Trade-history"
+                        className="fa fa-download"
+                        buttonText=" Download"
+                      />
 
                       {/* <button
                         id="downloadBtn"
@@ -1890,7 +1910,7 @@ function Dashboard() {
                           color: totalPL >= 0 ? "green" : "red",
                         }}
                       >
-                        {totalPL >= 0 ? `+${totalPL}` : totalPL}
+                        {totalPL >= 0 ? `${totalPL}` : totalPL}
                       </span>
                     </div>
                   </div>
