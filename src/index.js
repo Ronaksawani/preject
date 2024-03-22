@@ -7,6 +7,7 @@ import "./index.css";
 //import Dashboard from "../src/components/api";
 import { GlobalProvider } from "./store/Contex";
 import App from "./App";
+import CheckConnection from "./components/CheckConnection";
 //import App from "./components/Chart";
 //import TradingViewWidget from './components/Tv';
 //import App from './components/BSEDataFetcher';
@@ -15,18 +16,21 @@ import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <GlobalProvider>
-    {/* <HashRouter>
-      <App />
-    </HashRouter>
-    <HashRouter>
-      <YahooFinanceDataFetcher />
-    </HashRouter>
+  <CheckConnection>
     
-    <App /> */}
-    {/* <Dashboard /> */}
-    <App></App>
-  </GlobalProvider>
+    <GlobalProvider>
+      {/* <HashRouter>
+    <App />
+  </HashRouter>
+  <HashRouter>
+    <YahooFinanceDataFetcher />
+  </HashRouter>
+  
+  <App /> */}
+      {/* <Dashboard /> */}
+      <App></App>
+    </GlobalProvider>
+  </CheckConnection>
 );
 
 // If you want to start measuring performance in your app, pass a functi
