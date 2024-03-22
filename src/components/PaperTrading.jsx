@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import "../../src/App.css";
 import dash_img from "../assets/images/paperTrading_dash_img.png";
 import whyPaperTrading from "../assets/images/whypt.png";
-import Accordian from "./Accordian";
+
 
 const PaperTrading = () => {
   return (
