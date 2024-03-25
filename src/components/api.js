@@ -210,7 +210,7 @@ function Dashboard() {
   const inputRefPopup = useRef(null);
   const [hoveredTransaction, setHoveredTransaction] = useState(null);
   const [totalPL, setTotalPL] = useState("00.00");
-
+  const [marginUsed, setMarginUsed] = useState(0);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
   const {
@@ -239,8 +239,13 @@ function Dashboard() {
   const [marketStatus, setMarketStatus] = useState(null);
 
   useEffect(() => {
-    const marketState = getMarketStatus();
-    setMarketStatus(marketState);
+    const intervalId = setInterval(() => {
+      const marketState = getMarketStatus();
+      setMarketStatus(marketState);
+    }, 1000); // Interval set to 1 second (1000 milliseconds)
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -321,6 +326,7 @@ function Dashboard() {
   useEffect(() => {
     if (serverPrice && serverPrice.length > 0) {
       let totalPL = 0; // Initialize total profit/loss
+      let totalMarginUsed = 0;
       serverPrice.forEach((transaction) => {
         const singleQuantity =
           transaction.type === "BUY"
@@ -329,11 +335,14 @@ function Dashboard() {
 
         const profitLoss = (singleQuantity * transaction.quantity).toFixed(2);
         totalPL += parseFloat(profitLoss); // Add profit/loss to totalPL
+        totalMarginUsed += parseFloat(transaction.totalPrice);
       });
       setTotalPL(totalPL.toFixed(2)); // Update totalPL state
+      setMarginUsed(totalMarginUsed.toFixed(2));
     }
     if (serverPrice.length < 1) {
       setTotalPL("00.00");
+      setMarginUsed(0);
     }
   }, [serverPrice]); // Trigger effect when serverPrice changes
 
@@ -1218,14 +1227,14 @@ function Dashboard() {
                                 data-tooltip-id="my-tooltip-2"
                                 style={{ marginLeft: "10px", color: "black" }}
                               >
-                                {formatAmount(userDetails.margin_used)}
+                                {formatAmount(marginUsed)}
                               </span>
                               <ReactTooltip id="my-tooltip-2" place="top">
                                 {new Intl.NumberFormat("en-IN", {
                                   style: "currency",
                                   currency: "INR",
                                   currencyDisplay: "symbol",
-                                }).format(userDetails.margin_used)}
+                                }).format(marginUsed)}
                               </ReactTooltip>
                             </span>
                             <span
