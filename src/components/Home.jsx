@@ -17,6 +17,9 @@ import PaperTrading from "./PaperTrading";
 
 const Home = () => {
   const [homeComponent, setHomeComponent] = useState("home");
+  useEffect(()=>{
+    console.log("hello")
+  },[]);
 
   const handleHome = () => {
     setHomeComponent("paperTrade");
