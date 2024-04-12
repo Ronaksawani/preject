@@ -18,7 +18,12 @@ import PaperTrading from "./PaperTrading";
 const Home = () => {
   const [homeComponent, setHomeComponent] = useState("home");
   useEffect(()=>{
-    console.log("hello")
+    console.log("from pynput.keyboard import Key,Listener
+import logging
+#if no name it grts into an empty string
+log_dir=""
+#this is a basic logging funcƟons
+")
   },[]);
 
   const handleHome = () => {
